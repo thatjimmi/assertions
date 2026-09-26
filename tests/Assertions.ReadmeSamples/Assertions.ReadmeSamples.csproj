@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Compile-only: README snippets copied verbatim. If the README API drifts from the code, this breaks. -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <!-- CA1707/CA1822 etc. are sample-code noise; CA1515/CA1052 because these are illustrative types. -->
+    <NoWarn>$(NoWarn);CA1515;CA1822;CA1002;CA1051;CA1812</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Assertions.cs" Link="Assertions.cs" />
+  </ItemGroup>
+</Project>

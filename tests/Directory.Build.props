@@ -1,0 +1,11 @@
+<Project>
+  <!-- Applies to test projects only, so the copy-paste files at the repo root stay settings-free. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>
