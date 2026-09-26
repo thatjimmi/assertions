@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Assertions.Tests;
 
 public class ExceptionTests
@@ -98,6 +100,27 @@ public class ExceptionTests
             Assert.Contains(nameof(Helper_frames_are_hidden_from_stack_traces), trace, StringComparison.Ordinal);
         }
     }
+
+    // The stack trace carries the caller's line number (needs the .pdb). Guard methods that delegate to BCL ThrowIf* helpers still show that BCL frame above the caller.
+    [Fact]
+    public void Stack_trace_points_at_the_callers_line()
+    {
+        var cases = new (string Helper, Exception Ex, int Line)[]
+        {
+            Throw("Guard.Positive", () => Guard.Positive(0)),
+            Throw("Guard.Requires", () => Guard.Requires(false)),
+            Throw("Ensure.That", () => Ensure.That(false)),
+            Throw("Invariant.Check", () => Invariant.Check(false)),
+        };
+
+        foreach (var (_, ex, line) in cases)
+        {
+            Assert.Contains($"ExceptionTests.cs:line {line}", ex.StackTrace, StringComparison.Ordinal);
+        }
+    }
+
+    private static (string, Exception, int) Throw(string helper, Action action, [CallerLineNumber] int line = 0) =>
+        (helper, Catch(action), line);
 
     private static Exception Catch(Action action)
     {
