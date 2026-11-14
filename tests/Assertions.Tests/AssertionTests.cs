@@ -41,6 +41,30 @@ public class EnsureTests
     }
 }
 
+public class EnsureEqualTests
+{
+    [Fact]
+    public void Equal_matching_values_does_not_throw() => Ensure.Equal(1, 1);
+
+    [Fact]
+    public void Equal_mismatch_reports_both_values()
+    {
+        var actual = 150.25m;
+        var expected = 150.00m;
+        var ex = Assert.Throws<PostconditionViolationException>(() => Ensure.Equal(actual, expected));
+        Assert.Contains($"left: {actual}", ex.Message, StringComparison.Ordinal);
+        Assert.Contains($"right: {expected}", ex.Message, StringComparison.Ordinal);
+        Assert.Equal("actual == expected", ex.Expression);
+    }
+
+    [Fact]
+    public void Equal_custom_message()
+    {
+        var ex = Assert.Throws<PostconditionViolationException>(() => Ensure.Equal(1, 2, "boom"));
+        Assert.Equal("boom", ex.Message);
+    }
+}
+
 public class InvariantTests
 {
     [Fact]
@@ -100,4 +124,52 @@ public class InvariantTests
     };
 
     private static int LineNumber([CallerLineNumber] int line = 0) => line;
+}
+
+public class InvariantEqualTests
+{
+    [Fact]
+    public void Equal_matching_values_does_not_throw() => Invariant.Equal(42, 42);
+
+    [Fact]
+    public void Equal_mismatch_reports_both_values()
+    {
+        var position = 150.25m;
+        var expected = 150.00m;
+        var ex = Assert.Throws<InvariantViolationException>(() => Invariant.Equal(position, expected));
+        Assert.Contains($"left: {position}", ex.Message, StringComparison.Ordinal);
+        Assert.Contains($"right: {expected}", ex.Message, StringComparison.Ordinal);
+        Assert.Equal("position == expected", ex.Expression);
+    }
+
+    [Fact]
+    public void Equal_custom_message()
+    {
+        var ex = Assert.Throws<InvariantViolationException>(() => Invariant.Equal(1, 2, "mismatch"));
+        Assert.Equal("mismatch", ex.Message);
+    }
+}
+
+public class InvariantCloseTests
+{
+    [Fact]
+    public void Close_within_tolerance_does_not_throw() => Invariant.Close(1.0, 1.0001, 0.001);
+
+    [Fact]
+    public void Close_exceeding_tolerance_reports_values()
+    {
+        var forecast = 150.5;
+        var actual = 149.0;
+        var ex = Assert.Throws<InvariantViolationException>(() => Invariant.Close(forecast, actual, 1.0));
+        Assert.Contains($"left: {forecast}", ex.Message, StringComparison.Ordinal);
+        Assert.Contains($"right: {actual}", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("diff:", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Close_exact_tolerance_boundary_does_not_throw() => Invariant.Close(1.0, 2.0, 1.0);
+
+    [Fact]
+    public void Close_just_over_boundary_throws() =>
+        Assert.Throws<InvariantViolationException>(() => Invariant.Close(1.0, 2.001, 1.0));
 }

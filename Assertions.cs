@@ -283,6 +283,31 @@ public static class Ensure
         }
     }
 
+    /// <summary>Requires <paramref name="left"/> to equal <paramref name="right"/>, including both values in the message on failure.</summary>
+    /// <typeparam name="T">The type to compare.</typeparam>
+    /// <param name="left">The actual value.</param>
+    /// <param name="right">The expected value.</param>
+    /// <param name="message">Optional message.</param>
+    /// <param name="leftExpr">Captured automatically. Do not pass.</param>
+    /// <param name="rightExpr">Captured automatically. Do not pass.</param>
+    /// <exception cref="PostconditionViolationException"><paramref name="left"/> and <paramref name="right"/> are not equal.</exception>
+    [StackTraceHidden]
+    public static void Equal<T>(
+        T left,
+        T right,
+        string? message = null,
+        [CallerArgumentExpression(nameof(left))] string? leftExpr = null,
+        [CallerArgumentExpression(nameof(right))] string? rightExpr = null)
+    {
+        if (!EqualityComparer<T>.Default.Equals(left, right))
+        {
+            var expression = $"{leftExpr} == {rightExpr}";
+            throw new PostconditionViolationException(
+                message ?? $"Postcondition failed: {expression} (left: {left}, right: {right})",
+                expression);
+        }
+    }
+
     /// <summary>Requires a result to be non-null. Typical use: <c>return Ensure.NotNull(result);</c></summary>
     /// <typeparam name="T">The reference type of the result.</typeparam>
     /// <param name="result">The result to check.</param>
@@ -309,6 +334,68 @@ public static class Ensure
 /// </summary>
 public static class Invariant
 {
+    /// <summary>Requires <paramref name="left"/> to equal <paramref name="right"/>.</summary>
+    /// <remarks>
+    /// Unlike <see cref="Check"/>, this variant includes both values in the message, making it easier to
+    /// diagnose the cause without a debugger: <c>Invariant.Equal(portfolio.NetPosition, before + trade.Volume)</c>
+    /// reports <c>portfolio.NetPosition == before + trade.Volume (left: 150.25, right: 150.00)</c>.
+    /// </remarks>
+    /// <typeparam name="T">The type to compare.</typeparam>
+    /// <param name="left">The actual value.</param>
+    /// <param name="right">The expected value.</param>
+    /// <param name="message">Optional message.</param>
+    /// <param name="leftExpr">Captured automatically. Do not pass.</param>
+    /// <param name="rightExpr">Captured automatically. Do not pass.</param>
+    /// <exception cref="InvariantViolationException"><paramref name="left"/> and <paramref name="right"/> are not equal.</exception>
+    [StackTraceHidden]
+    public static void Equal<T>(
+        T left,
+        T right,
+        string? message = null,
+        [CallerArgumentExpression(nameof(left))] string? leftExpr = null,
+        [CallerArgumentExpression(nameof(right))] string? rightExpr = null)
+    {
+        if (!EqualityComparer<T>.Default.Equals(left, right))
+        {
+            var expression = $"{leftExpr} == {rightExpr}";
+            throw new InvariantViolationException(
+                message ?? $"Invariant failed: {expression} (left: {left}, right: {right})",
+                expression);
+        }
+    }
+
+    /// <summary>Requires <c>|<paramref name="left"/> - <paramref name="right"/>|</c> to be within <paramref name="tolerance"/>.</summary>
+    /// <remarks>
+    /// Use for <c>double</c> and <c>float</c> values subject to rounding. Use <see cref="Equal{T}"/> with <c>decimal</c>
+    /// for money and positions, which require exact equality.
+    /// </remarks>
+    /// <typeparam name="T">A numeric type.</typeparam>
+    /// <param name="left">The first value.</param>
+    /// <param name="right">The second value.</param>
+    /// <param name="tolerance">The maximum allowed absolute difference.</param>
+    /// <param name="message">Optional message.</param>
+    /// <param name="leftExpr">Captured automatically. Do not pass.</param>
+    /// <param name="rightExpr">Captured automatically. Do not pass.</param>
+    /// <exception cref="InvariantViolationException">The absolute difference exceeds <paramref name="tolerance"/>.</exception>
+    [StackTraceHidden]
+    public static void Close<T>(
+        T left,
+        T right,
+        T tolerance,
+        string? message = null,
+        [CallerArgumentExpression(nameof(left))] string? leftExpr = null,
+        [CallerArgumentExpression(nameof(right))] string? rightExpr = null)
+        where T : INumber<T>
+    {
+        if (T.Abs(left - right) > tolerance)
+        {
+            var expression = $"|{leftExpr} - {rightExpr}| <= {tolerance}";
+            throw new InvariantViolationException(
+                message ?? $"Invariant failed: {expression} (left: {left}, right: {right}, diff: {T.Abs(left - right)})",
+                expression);
+        }
+    }
+
     /// <summary>Requires a rule about the program's state to be true.</summary>
     /// <remarks>
     /// Check invariants after state changes, but prevent violations with <see cref="Guard"/>

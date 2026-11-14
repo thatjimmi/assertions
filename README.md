@@ -325,7 +325,7 @@ dotnet test                # Debug: DebugCheck throws
 dotnet test -c Release     # Release: DebugCheck calls and their arguments are removed
 ```
 
-The projects in `tests/` link to `Assertions.cs` directly, so they always run against the real file. `Assertions.DropIn` proves the file compiles with nullable and implicit usings disabled, and `Assertions.ReadmeSamples` compiles this README's examples, so the build breaks if they drift from the code.
+The projects in `tests/` link to `Assertions.cs` directly, so they always run against the real file. `Assertions.ReadmeSamples` compiles this README's examples, so the build breaks if they drift from the code.
 
 **If you're copying the library, you only need the `.cs` files, not `tests/`.**
 
