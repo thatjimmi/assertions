@@ -124,3 +124,39 @@ public class BankProperties
         Assert.Equal("Cannot transfer to the same account.", ex.Message);
     }
 }
+
+public class InvariantCloseProperties
+{
+    [Property]
+    public bool Close_passes_exactly_when_diff_le_tolerance(NormalFloat leftF, NormalFloat rightF, PositiveInt toleranceTicks)
+    {
+        var left = leftF.Item;
+        var right = rightF.Item;
+        var tolerance = toleranceTicks.Get * 1e-6;
+        var diff = Math.Abs(left - right);
+        var shouldPass = diff <= tolerance;
+
+        try
+        {
+            Invariant.Close(left, right, tolerance);
+            return shouldPass;
+        }
+        catch (InvariantViolationException)
+        {
+            return !shouldPass;
+        }
+    }
+
+    [Property]
+    public bool Close_is_symmetric(NormalFloat leftF, NormalFloat rightF, PositiveInt toleranceTicks)
+    {
+        var left = leftF.Item;
+        var right = rightF.Item;
+        var tolerance = toleranceTicks.Get * 1e-6;
+
+        bool PassesLeft()  { try { Invariant.Close(left, right, tolerance); return true; } catch { return false; } }
+        bool PassesRight() { try { Invariant.Close(right, left, tolerance); return true; } catch { return false; } }
+
+        return PassesLeft() == PassesRight();
+    }
+}

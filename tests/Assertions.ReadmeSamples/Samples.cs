@@ -100,6 +100,25 @@ public static class Loops
     private static bool IsSorted(int[] items) => items.Zip(items.Skip(1), (a, b) => a <= b).All(x => x);
 }
 
+// "Invariant.Equal / Invariant.Close" section
+public static class TradingSamples
+{
+    public static void ConservationCheck(decimal netPosition, decimal before, decimal tradeVolume)
+    {
+        Invariant.Equal(netPosition, before + tradeVolume);
+    }
+
+    public static void ForecastCheck(double modelOutput, double observed)
+    {
+        Invariant.Close(modelOutput, observed, tolerance: 0.5);
+    }
+
+    public static void PostconditionCheck(decimal result, decimal expected)
+    {
+        Ensure.Equal(result, expected);
+    }
+}
+
 // Background-job snippet (uses Microsoft.Extensions.Logging in the README, so only the catch shape is checked here).
 public static class Jobs
 {

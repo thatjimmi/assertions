@@ -488,6 +488,8 @@ When an agent gets something wrong in a new way, add a line to the skill describ
 
 **I already use another `Guard` library.** Put this in its own namespace and don't import both in the same file, or rename one of the classes.
 
+**Why doesn't `Guard.Requires` return a value?** The other `Guard` methods validate a single named value and can return it, letting you write `_name = Guard.NotNullOrWhiteSpace(name)`. `Requires` takes an arbitrary boolean expression, so there is no single value to return. Use a specific guard when one fits; reach for `Requires` only for conditions that none of the specific methods cover.
+
 **What if my team disagrees with a rule?** Change it. Update the README, the `CLAUDE.md` section and the skill together so people and agents follow the same rules.
 
 ## License
