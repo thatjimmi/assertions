@@ -387,11 +387,12 @@ public static class Invariant
         [CallerArgumentExpression(nameof(right))] string? rightExpr = null)
         where T : INumber<T>
     {
-        if (T.Abs(left - right) > tolerance)
+        var diff = T.Abs(left - right);
+        if (diff > tolerance)
         {
             var expression = $"|{leftExpr} - {rightExpr}| <= {tolerance}";
             throw new InvariantViolationException(
-                message ?? $"Invariant failed: {expression} (left: {left}, right: {right}, diff: {T.Abs(left - right)})",
+                message ?? $"Invariant failed: {expression} (left: {left}, right: {right}, diff: {diff})",
                 expression);
         }
     }

@@ -132,6 +132,8 @@ public decimal ApplyDiscount(decimal percent)
 
 `return Ensure.NotNull(result);` is handy for methods that must never return null.
 
+`Ensure.Equal(actual, expected)` is the postcondition equivalent of `Invariant.Equal` — same message format, different exception type.
+
 ### Invariant
 
 Rules about your program's state that must always hold, checked right after state changes. Conservation rules ("the total before equals the total after") and range rules ("never negative") are the most valuable:
@@ -139,6 +141,14 @@ Rules about your program's state that must always hold, checked right after stat
 ```csharp
 Invariant.Check(from.Balance + to.Balance == totalBefore);
 ```
+
+`Invariant.Equal(left, right)` is a shorthand for conservation checks that includes both values in the message on failure, so you can see the discrepancy without a debugger:
+
+```
+Invariant failed: portfolio.NetPosition == before + trade.Volume (left: 150.25, right: 150.00)
+```
+
+`Invariant.Close(left, right, tolerance)` is the floating-point variant — use it for `double` values such as forecasts where rounding is expected. Use `Equal` with `decimal` for money and positions, which require exact equality.
 
 `Invariant.Unreachable()` marks code that should be impossible, and records the method, file and line:
 
@@ -414,7 +424,10 @@ This codebase uses Assertions.cs. The goal: bugs fail loudly at their source wit
 - `Guard.*`: preconditions at the top of public methods and constructors. Throws standard `ArgumentException` types. Single-value methods return the value, so validate and assign together.
   Available: `NotNull`, `NotNullOrEmpty`, `NotNullOrWhiteSpace`, `NotEmpty`, `NotDefault`, `Positive`, `NotNegative`, `InRange` (inclusive), `Defined` (enums, not `[Flags]`), `Requires(condition)` for anything else. Prefer the specific method over `Requires` when one fits.
 - `Ensure.That(...)` / `Ensure.NotNull(...)`: postconditions just before returning.
+- `Ensure.Equal(left, right)`: postcondition that includes both values in the failure message.
 - `Invariant.Check(...)`: rules about state that must always hold, checked right after state changes.
+- `Invariant.Equal(left, right)`: conservation check that includes both values in the message — prefer over `Check(a == b)` for numeric equality.
+- `Invariant.Close(left, right, tolerance)`: floating-point proximity check. Use for `double`/`float`; use `Equal` for `decimal` money and positions.
 - `throw Invariant.Unreachable(...)`: branches that should be impossible, typically the `_ =>` arm of a switch over an enum or state.
 - `DebugCheck.That(...)`: expensive checks only. Removed from Release builds together with its arguments.
 

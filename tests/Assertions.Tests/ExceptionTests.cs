@@ -87,7 +87,10 @@ public class ExceptionTests
             ("Guard.Requires", Catch(() => Guard.Requires(false))),
             ("Ensure.That", Catch(() => Ensure.That(false))),
             ("Ensure.NotNull", Catch(() => Ensure.NotNull<object>(null))),
+            ("Ensure.Equal", Catch(() => Ensure.Equal(1, 2))),
             ("Invariant.Check", Catch(() => Invariant.Check(false))),
+            ("Invariant.Equal", Catch(() => Invariant.Equal(1, 2))),
+            ("Invariant.Close", Catch(() => Invariant.Close(1.0, 3.0, 0.5))),
 #if DEBUG
             ("DebugCheck.That", Catch(() => DebugCheck.That(false))),
 #endif
@@ -110,7 +113,10 @@ public class ExceptionTests
             Throw("Guard.Positive", () => Guard.Positive(0)),
             Throw("Guard.Requires", () => Guard.Requires(false)),
             Throw("Ensure.That", () => Ensure.That(false)),
+            Throw("Ensure.Equal", () => Ensure.Equal(1, 2)),
             Throw("Invariant.Check", () => Invariant.Check(false)),
+            Throw("Invariant.Equal", () => Invariant.Equal(1, 2)),
+            Throw("Invariant.Close", () => Invariant.Close(1.0, 3.0, 0.5)),
         };
 
         foreach (var (_, ex, line) in cases)
